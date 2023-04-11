@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas
@@ -8,7 +9,7 @@ def get_user(db: Session, user_id: str):
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 20):
-    return db.query(models.User).offset(skip).limit(0).all()
+    return db.query(models.User).offset(skip).limit(limit).all()
 
 
 def get_user_by_sdu_id(db: Session, sdu_id: str):
@@ -16,7 +17,10 @@ def get_user_by_sdu_id(db: Session, sdu_id: str):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.User(**user.dict())
+    user_data = user.dict()
+    del user_data["password"]
+    db_user = models.User(**user_data)
+    db_user.name = "test"  # type: ignore
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -54,7 +58,7 @@ def get_campuses(db: Session, skip: int = 0, limit: int = 0):
     return db.query(models.Campus).offset(skip).limit(limit).all()
 
 
-def create_campus(db: Session, campus: schemas.Campus):
+def create_campus(db: Session, campus: schemas.CampusCreate):
     db_campus = models.Campus(**campus.dict())
     db.add(db_campus)
     db.commit()
@@ -89,8 +93,13 @@ def get_time(db: Session, time_id: str):
     return db.query(models.Time).filter(models.Time.id == time_id).first()
 
 
-def get_times(db: Session, skip: int = 0, limit: int = 20):
-    return db.query(models.Time).offset(skip).limit(limit).all()
+def get_times(
+    db: Session, skip: int = 0, limit: int = 20, campus_id: Optional[str] = None
+):
+    query = db.query(models.Time)
+    if campus_id:
+        query = query.filter(models.Time.campus_id == campus_id)
+    return query.offset(skip).limit(limit).all()
 
 
 def create_time(db: Session, time: schemas.TimeCreate):

@@ -66,9 +66,9 @@ class User(BaseModel):
     signed_up: bool
     phone_number: Optional[str]
     gender: Optional[str]
-    multi_person = Optional[bool]
-    time_id = Optional[str]
-    time = Optional[Time]
+    multi_person: Optional[bool]
+    time_id: Optional[str]
+    time: Optional[Time]
 
     class Config:
         orm_mode = True
@@ -77,12 +77,12 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     sdu_id: str
-    name: str
-    signed_up: bool
+    password: str
+    signed_up: Optional[bool]
     phone_number: Optional[str]
     gender: Optional[str]
-    multi_person = Optional[bool]
-    time_id = Optional[str]
+    multi_person: Optional[bool]
+    time_id: Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -92,8 +92,8 @@ class UserUpdate(BaseModel):
     signed_up: bool
     phone_number: Optional[str]
     gender: Optional[str]
-    multi_person = Optional[bool]
-    time_id = Optional[str]
+    multi_person: Optional[bool]
+    time_id: Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -102,3 +102,9 @@ class UserUpdate(BaseModel):
 class Login(BaseModel):
     sdu_id: str
     password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    user: User
