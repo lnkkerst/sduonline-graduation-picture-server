@@ -1,0 +1,19 @@
+[tool.pdm]
+
+[tool.pdm.scripts]
+dev = "uvicorn graduation_picture.main:app --reload"
+start = "uvicorn graduation_picture.main:app"
+
+[project]
+name = ""
+version = ""
+description = ""
+authors = [{ name = "lnkkerst", email = "lnkkerst04@gmail.com" }]
+dependencies = [
+  "fastapi>=0.95.0",
+  "uvicorn[standard]>=0.21.1",
+  "sqlalchemy>=2.0.9",
+  "fastapi-jwt-auth>=0.5.0",
+]
+requires-python = ">=3.10"
+license = { text = "MIT" }
