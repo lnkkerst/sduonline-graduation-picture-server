@@ -32,6 +32,7 @@ class Time(BaseModel):
     end: datetime
     capacity: int
     campus_id: str
+    campus: Optional[Campus]
 
     class Config:
         orm_mode = True
