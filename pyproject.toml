@@ -14,7 +14,7 @@ dependencies = [
     "uvicorn[standard]>=0.21.1",
     "sqlalchemy>=2.0.9",
     "fastapi-jwt-auth>=0.5.0",
-    "requests>=2.28.2",
+    "httpx>=0.24.0",
 ]
 requires-python = ">=3.10"
 license = { text = "MIT" }

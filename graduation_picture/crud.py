@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
 from . import models, schemas
 
 
@@ -16,11 +17,11 @@ def get_user_by_sdu_id(db: Session, sdu_id: str):
     return db.query(models.User).filter(models.User.sdu_id == sdu_id).first()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, user: schemas.UserCreate, name: str):
     user_data = user.dict()
     del user_data["password"]
     db_user = models.User(**user_data)
-    db_user.name = "test"  # type: ignore
+    db_user.name = name  # type: ignore
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -41,9 +42,24 @@ def update_user(db: Session, user_id: str, user: schemas.UserUpdate):
     db_user = get_user(db=db, user_id=user_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    db.begin_nested()
+    if db_user.time_id:
+        time1 = get_time(db=db, time_id=db_user.time_id)  # type: ignore
+        if time1:
+            time1.capacity = time1.capacity + 1  # type:ignore
+            db.add(time1)
+
     user_data = user.dict(exclude_unset=True)
     for k, v in user_data.items():
         setattr(db_user, k, v)
+    if db_user.time_id:
+        time2 = get_time(db=db, time_id=db_user.time_id)  # type: ignore
+        if not time2:
+            raise HTTPException(status_code=400, detail="Time not found")
+        if time2.capacity <= 0:
+            raise HTTPException(status_code=400, detail="Insufficient capacity")
+        time2.capacity = time2.capacity - 1  # type: ignore
+        db.add(time2)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -127,6 +143,20 @@ def update_time(db: Session, time_id: str, time: schemas.TimeUpdate):
     time_data = time.dict(exclude_unset=True)
     for k, v in time_data.items():
         setattr(db_time, k, v)
+    db.add(db_time)
+    db.commit()
+    db.refresh(db_time)
+    return db_time
+
+
+def select_time(db: Session, time_id: str, diff: int = 0):
+    db_time = get_time(db=db, time_id=time_id)
+    if not db_time:
+        raise HTTPException(status_code=404, detail="Time not found")
+    tmp = db_time.capacity + diff  # type: ignore
+    if tmp < 0:
+        raise HTTPException(status_code=400, detail="Insufficient capacity")
+    db_time.capacity = tmp  # type: ignore
     db.add(db_time)
     db.commit()
     db.refresh(db_time)

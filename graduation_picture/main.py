@@ -8,6 +8,8 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 from starlette.responses import JSONResponse
 import os
 
+from graduation_picture.utils import login_sdu
+
 from .database import SessionLocal, engine
 from . import models, schemas, crud
 
@@ -74,14 +76,17 @@ def get_current_user(db: Session = Depends(get_db), Authorize: AuthJWT = Depends
 
 
 @app.post("/login", response_model=schemas.LoginResponse)
-def login(
+async def login(
     user: schemas.UserCreate,
     db: Session = Depends(get_db),
     Authorize: AuthJWT = Depends(),
 ):
+    res = await login_sdu(sdu_id=user.sdu_id, password=user.password)
+    if not res:
+        raise HTTPException(status_code=401, detail="Authorization failed")
     db_user = crud.get_user_by_sdu_id(db, sdu_id=user.sdu_id)
     if not db_user:
-        db_user = crud.create_user(db=db, user=user)
+        db_user = crud.create_user(db=db, user=user, name=res["name"])
 
     access_token = Authorize.create_access_token(subject=db_user.id)  # type: ignore
     refresh_token = Authorize.create_refresh_token(subject=db_user.id)  # type: ignore
@@ -92,9 +97,9 @@ def login(
     }
 
 
-@app.get("/users", response_model=List[schemas.User])
-def get_users(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
-    return crud.get_users(db=db, skip=skip, limit=limit)
+# @app.get("/users", response_model=List[schemas.User])
+# def get_users(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+#     return crud.get_users(db=db, skip=skip, limit=limit)
 
 
 @app.delete("/user", response_model=Optional[schemas.User])
