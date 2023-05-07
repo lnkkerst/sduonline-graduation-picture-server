@@ -43,7 +43,7 @@ def update_user(db: Session, user_id: str, user: schemas.UserUpdate):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     db.begin_nested()
-    if db_user.time_id:
+    if db_user.signed_up and db_user.time_id:
         time1 = get_time(db=db, time_id=db_user.time_id)  # type: ignore
         if time1:
             time1.capacity = time1.capacity + 1  # type:ignore
@@ -52,7 +52,7 @@ def update_user(db: Session, user_id: str, user: schemas.UserUpdate):
     user_data = user.dict(exclude_unset=True)
     for k, v in user_data.items():
         setattr(db_user, k, v)
-    if db_user.time_id:
+    if db_user.signed_up and db_user.time_id:
         time2 = get_time(db=db, time_id=db_user.time_id)  # type: ignore
         if not time2:
             raise HTTPException(status_code=400, detail="Time not found")

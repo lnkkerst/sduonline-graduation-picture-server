@@ -15,6 +15,7 @@ class User(Base):
     name = Column(String, nullable=False, unique=False)
     signed_up = Column(Boolean, nullable=False, default=False)
     phone_number = Column(String, nullable=True)
+    qq = Column(String, nullable=True)
     gender = Column(String, nullable=True)
     multi_person = Column(Boolean, nullable=True)
     time_id = Column(String, ForeignKey("times.id"), nullable=True)

@@ -70,6 +70,7 @@ class User(BaseModel):
     multi_person: Optional[bool]
     time_id: Optional[str]
     time: Optional[Time]
+    qq: Optional[str]
 
     class Config:
         orm_mode = True
@@ -81,6 +82,7 @@ class UserCreate(BaseModel):
     password: str
     signed_up: Optional[bool]
     phone_number: Optional[str]
+    qq: Optional[str]
     gender: Optional[str]
     multi_person: Optional[bool]
     time_id: Optional[str]
@@ -95,6 +97,7 @@ class UserUpdate(BaseModel):
     gender: Optional[str]
     multi_person: Optional[bool]
     time_id: Optional[str]
+    qq: Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
